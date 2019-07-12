@@ -1,7 +1,7 @@
 import socket
 
 
-def random_port():
+def randomPort():
     """Get a single random port."""
     sock = socket.socket()
     sock.bind(('', 0))

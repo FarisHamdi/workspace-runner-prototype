@@ -40,4 +40,4 @@ EXPOSE 8888
 RUN mkdir -p /opt/app/data
 RUN echo "c.NotebookApp.token = u''" >> ~/.jupyter/jupyter_notebook_config.py
 
-CMD jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --notebook-dir=/opt/app/data --allow-root
+CMD jupyter lab --ip=0.0.0.0 --port=8787 --no-browser --notebook-dir=/opt/app/data --allow-root
