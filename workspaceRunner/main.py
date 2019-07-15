@@ -15,11 +15,15 @@ async def getRunningContainers(request):
 @app.route("/spinUpWorkspace/",  methods=['POST'])
 async def spinUpWorkspace(request):
 
-    print(request.args)
-    containerInstance = dockerController.createContainer(request.args['containerType'], 'test', 'e')
+    containerInstance = dockerController.createContainer(request.form['containerType'][0], 'test', 'e')
     return response.json({"containerInstance": containerInstance})
 
+@app.route("/killAllContainers/", methods=['POST'])
+async def killAllContainers(request):
 
+    dockerController.killAllContainers()
+    containerList = dockerController.getContainers()
+    return response.json({"containerList": containerList})
 
 
 app.static('/favicon.ico', './classic-blue.png')
