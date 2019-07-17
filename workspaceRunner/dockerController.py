@@ -7,37 +7,39 @@ from settings import defaultInternalPort
 client = docker.from_env()
 
 #TODO: organize container/template names by adding a template class, and associated functions 
-def createContainer(containerType, username, projectName):
+def createContainer(containerType, username, project_id):
 
     randomPort = utils.randomPort()
 
     portSetting = {
-       defaultInternalPort + "/tcp" : randomPort
+       defaultInternalPort + "/tcp" : ('127.0.0.1', randomPort)
     }
 
     if containerType == "jupyterLab":
         print("Starting JupyterLab Container...")
         container =  client.containers.run("jupyterlab-workspace:latest", 
-            auto_remove=False, detach = True, ports=portSetting)
+            auto_remove=True, detach = True, ports=portSetting)
 
     elif containerType == "rStudio":
         print("Starting RStudio Container...")
         container = client.containers.run("rstudio-workspace:latest", 
-            auto_remove=False, detach = True, ports=portSetting)
+            auto_remove=True, detach = True, ports=portSetting)
 
     waitForContainerStable(container)
-    containerInstance = dictToContainerObj(container.__dict__['attrs'])
+    containerInstance = dictToContainerObj(container.__dict__['attrs'], username, project_id)
 
     return containerInstance
 
-def getContainers():
-    containerList = client.containers.list()
+# TODO: FIXME: Figure out what to do with this function, currently broken
+def getRunningContainers():
+
+    updateContainerStatus()
+    inMemoryContainerList = WorkSpaceContainer.select().where(WorkSpaceContainer.status == 'running')
     fmtContainerList = []
 
-    for container in containerList:
+    for container in inMemoryContainerList:
 
-        fmtContainerList.append()
-        fmtContainerList.append(ContainerObject(**container.__dict__['attrs']))
+        fmtContainerList.append(container.dict())
 
     return fmtContainerList
 
@@ -46,7 +48,7 @@ def waitForContainerStable(container):
     print("Waiting for Container to stabilize...")
 
     while container.status == 'created':
-        time.sleep(0.1)
+        time.sleep(0.05)
         container.reload()
 
     print("Container Stabilized! --> ", container.status)
@@ -63,13 +65,24 @@ def killAllContainers():
     return True
 
 def updateContainerStatus():
-    containerList = client.containers.list()
+    print("Updating Docker Container Status...")
 
-    #get all 
-    for container in containerList
+    runningContainerList = client.containers.list()
+    inMemContainerList = WorkSpaceContainer.select().where(WorkSpaceContainer.status == 'running')
 
+    runningContainerIds = [container.id for container in runningContainerList]
 
-def dictToContainerObj(attrs):
+    for inMemContainer in inMemContainerList:
+        if inMemContainer.id in runningContainerIds:
+            print("This container is running!!!")
+        else:
+            inMemContainer.status = 'stopped'
+            print("This container is stopped~")
+            inMemContainer.save()
+
+    return True
+
+def dictToContainerObj(attrs, username, project_id):
     
     attrsName = attrs['Name'].split('/')[1]
     attrsId = attrs['Id']
@@ -79,7 +92,9 @@ def dictToContainerObj(attrs):
                                     id=attrsId,
                                     status=attrsStatus,
                                     imageName=attrsImageName,
-                                    attrs=attrs
+                                    attrs=attrs,
+                                    username=username,
+                                    project_id=project_id
                                     )
 
     containerObj.save(force_insert=True)
