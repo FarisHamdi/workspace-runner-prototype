@@ -3,12 +3,12 @@ from rest_framework.views import APIView
 from django.http import HttpResponseForbidden
 from rest_framework import status, viewsets
 from rest_framework.response import Response
+from apscheduler.schedulers.background import BackgroundScheduler
 from backend_app.models import Runner, Workspace
 from backend.settings import RUNNER_KEY
 from backend_app.serializers import RunnerSerializer, WorkspaceSerializer
 import datetime, ast
 import requests
-
 
 class RunnerViewSet(viewsets.ModelViewSet):
     queryset = Runner.objects.all()
@@ -28,6 +28,7 @@ class RegisterRunner(APIView):
         runnerPort = request.data['port']
 
         print(runnerId)
+
         # check if key is valid
         if apiKey != RUNNER_KEY:
             return HttpResponseForbidden()
@@ -58,7 +59,7 @@ class CoordinatorPing(APIView):
             runner.save()
             print('runner pinged! --> ', runner)
         except:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
         return Response(status=status.HTTP_202_ACCEPTED)
 
@@ -90,13 +91,15 @@ class CreateContainer(APIView):
 def updateWorkSpaces(containerList, runnerId):
     
     # get all workspaces from runner
-    # inMemWorkSpaces = Workspace.objects.all().filter(runner_id==runnerId)
+    inMemWorkSpaces = Workspace.objects.filter(runner_id=runnerId)
     # inMemWorkSpacesIds = [workspace.id for workspace in inMemWorkSpaces]
     containerListIds = [container['id'] for container in containerList]
 
-    print('THE CONTAINER LIST IS  ', containerListIds)
-    # for inMemWorkSpace in inMemWorkSpaces:
-    #     if inMemWorkSpace.id in 
+    for inMemWorkSpace in inMemWorkSpaces:
+        if inMemWorkSpace.id not in containerListIds:
+            inMemWorkSpace.delete()
+
+
 
 def createWorkspaceFromJson(json, runnerId):
     container = json['containerInstance']['attrs']
@@ -110,3 +113,24 @@ def createWorkspaceFromJson(json, runnerId):
 
     return newWorkspace
 
+def cleanUpRunners():
+
+    print("checking active runners list...")
+    allRunners = Runner.objects.all()
+
+    for runner in allRunners:
+        timeDiff = datetime.datetime.now(datetime.timezone.utc) - runner.lastContacted 
+        
+        if timeDiff > datetime.timedelta(minutes=2):
+            print('Found a stale running, removing...', timeDiff)
+            runner.delete()
+
+
+def startBackgroundTasks():
+    print("Starting background processes...")
+    scheduler = BackgroundScheduler()
+    scheduler.start()
+    scheduler.add_job(cleanUpRunners, trigger='interval', minutes=1)
+
+
+startBackgroundTasks()
