@@ -1,7 +1,7 @@
 import socket
 import requests
-import settings, models
 import uuid
+import settings, models, dockerController
 
 def randomPort():
     """Get a single random port."""
@@ -33,12 +33,19 @@ def registerRunner():
         raise Exception("Registration Failed, coordinator returned a non 202 response")
 
 def pingCoordinator():
-
     print("pinging cordinator...")
+
+    # TODO: FIXME: figure out what to do with the case where more than one registration
+    # instance exists
     reg = models.Registration.get()
     runnerId = reg.id
+
+    containerList = dockerController.getRunningContainers()
+    print('Container List, ping, ', containerList)
+
     pingData = {
-        'runnerId': str(runnerId)
+        'id': str(runnerId),
+        'containerList': str(containerList)
     }
 
     try:
@@ -49,7 +56,7 @@ def pingCoordinator():
     if req.status_code == 202:
         print("Yeah!", req)
     else: 
-        raise Exception("Failed to connect to coordinator, coordinator returned a non 202 response")
+        raise Exception("Failed to connect to coordinator, coordinator returned a non 202 response: ", req)
 
 def checkRegistration():
 

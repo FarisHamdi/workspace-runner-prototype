@@ -13,7 +13,7 @@ def createContainer(containerType, username, project_id):
     randomPort = utils.randomPort()
 
     portSetting = {
-       defaultInternalPort + "/tcp" : ('127.0.0.1', randomPort)
+       DEFAULT_INTERNAL_PORT + "/tcp" : ('127.0.0.1', randomPort)
     }
 
     if containerType == "jupyterLab":
@@ -74,10 +74,10 @@ def updateContainerStatus():
 
     for inMemContainer in inMemContainerList:
         if inMemContainer.id in runningContainerIds:
-            print("This container is running!!!")
+            print("This container is running! --> ", inMemContainer.name)
         else:
             inMemContainer.status = 'stopped'
-            print("This container is stopped~")
+            print("This container is stopped~ --> ", inMemContainer.name)
             inMemContainer.save()
 
     return True
