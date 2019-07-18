@@ -9,4 +9,4 @@ def startBackgroundTasks():
     scheduler = BackgroundScheduler()
     scheduler.start()
     scheduler.add_job(updateContainerStatus, trigger='interval', seconds=15)
-    scheduler.add_job(pingCoordinator, trigger='interval', minutes=1)
+    scheduler.add_job(pingCoordinator, trigger='interval', seconds=30)

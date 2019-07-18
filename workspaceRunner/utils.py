@@ -55,6 +55,13 @@ def pingCoordinator():
 
     if req.status_code == 202:
         print("Yeah!", req)
+    elif req.status_code == 401:
+        # In this case runner id is not valid, re-register runner
+        print("Failed to ping co-ordinator")
+        print("Attempting to re-register")
+        reg.delete_instance()
+        registerRunner()
+
     else: 
         raise Exception("Failed to connect to coordinator, coordinator returned a non 202 response: ", req)
 
