@@ -1,5 +1,5 @@
 from peewee import *
-from settings import defaultInternalPort
+from settings import DEFAULT_INTERNAL_PORT
 from playhouse.hybrid import *
 import datetime, ast
 
@@ -9,7 +9,7 @@ class BaseModel(Model):
     class Meta:
         database = db
 
-class WorkSpaceContainer(Model):
+class WorkSpaceContainer(BaseModel):
     name = CharField()
     id = CharField(primary_key=True)
     username = CharField()
@@ -23,10 +23,8 @@ class WorkSpaceContainer(Model):
     def port(self):
 
         parsed_attrs = ast.literal_eval(self.attrs)
-        return parsed_attrs['NetworkSettings']['Ports'][defaultInternalPort + "/tcp"][0]['HostPort']
+        return parsed_attrs['NetworkSettings']['Ports'][DEFAULT_INTERNAL_PORT + "/tcp"][0]['HostPort']
 
-    class Meta:
-        database = db
 
     def dict(self):
         return {
@@ -40,3 +38,8 @@ class WorkSpaceContainer(Model):
             'lastUpdated': str(self.lastUpdated),
             'port': self.port
         }
+
+class Registration(BaseModel):
+    id = UUIDField(primary_key=True)
+    lastUpdated = DateTimeField(default=datetime.datetime.now)
+    coordinatorUrl = CharField()

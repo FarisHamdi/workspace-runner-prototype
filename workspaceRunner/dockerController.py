@@ -2,7 +2,8 @@ import docker
 import utils
 import time
 from models import WorkSpaceContainer
-from settings import defaultInternalPort
+from settings import DEFAULT_INTERNAL_PORT
+import utils
 
 client = docker.from_env()
 
@@ -30,7 +31,6 @@ def createContainer(containerType, username, project_id):
 
     return containerInstance
 
-# TODO: FIXME: Figure out what to do with this function, currently broken
 def getRunningContainers():
 
     updateContainerStatus()

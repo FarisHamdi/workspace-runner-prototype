@@ -1,13 +1,9 @@
 from sanic import Sanic
 from sanic import response 
-import dockerController
-import json
-import jsonpickle
-import tasks
-import uuid
+import dockerController, tasks, settings, models, utils
+import uuid, requests
 
 app = Sanic()
-tasks.startBackgroundTasks()
 
 @app.route("/listAllContainers/", methods=['GET'])
 async def getRunningContainers(request):
@@ -32,5 +28,7 @@ async def killAllContainers(request):
 app.static('/favicon.ico', './classic-blue.png')
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000,auto_reload=True)
+    tasks.startBackgroundTasks()
+    utils.checkRegistration()
+    app.run(host="0.0.0.0", port=settings.PORT ,auto_reload=True)
 

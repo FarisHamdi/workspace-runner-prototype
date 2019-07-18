@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -122,3 +123,7 @@ STATIC_URL = '/assets/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "backend_app/templates/assets/"),
 ]
+
+# Runner Related Config
+
+RUNNER_KEY = '722d1302-9491-4d43-adb7-90d266974d3f'
