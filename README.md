@@ -6,6 +6,6 @@
  - [x] Workspace Runner - Make an endpoint to spin up either Jupyterlab or RStudio environments
  - [x] Workspace Runner - Make an endpoint to list running instances
  - [ ] Workspace Runner - Make an endpoint to kill a running instance
- - [ ] Workspace Runner - Make an endpoint to kill all running workspace instances (for safe server shutdown)
- - [ ] Backend, Co-ordinator - Make a registration endpoint (a request would be sent to register a workspace runner)
+ - [x] Workspace Runner - Make an endpoint to kill all running workspace instances (for safe server shutdown)
+ - [x] Backend, Co-ordinator - Make a registration endpoint (a request would be sent to register a workspace runner)
 
